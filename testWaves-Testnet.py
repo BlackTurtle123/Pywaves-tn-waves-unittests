@@ -33,7 +33,7 @@ class WavesTest(unittest.TestCase):
         self.assertIn("error", str(output))
 
     def test_create_alias_error_not_enough_fee(self):
-        output = address2.createAlias("not_enough_fee", txFee=1000000000)
+        output = address2.createAlias("not_enough_fee", txFee=10)
         print(output)
         self.assertIn("error", str(output))
 
@@ -42,11 +42,11 @@ class WavesTest(unittest.TestCase):
         self.assertIn("length should be between 4 and 30", str(output))
 
     def test_alias(self):
-        output = address.createAlias(self.gen_random_str(30), txFee=1000000000)
+        output = address.createAlias(self.gen_random_str(30), txFee=100000)
         self.assertIn("id", str(output))
 
     def test_lease_enough_fee_and_cancel(self):
-        output = address.lease(address2, 1, txFee=2000000)
+        output = address.lease(address2, 1, txFee=100000)
         self.assertNotIn("error", str(output))
         time.sleep(60)
         output = address.leaseCancel(str(output['id']))
