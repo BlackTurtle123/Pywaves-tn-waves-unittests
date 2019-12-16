@@ -101,7 +101,7 @@ class TNTest(unittest.TestCase):
         output = address.leaseCancel(str(lease_output['id']), txFee=20000000)
         self.assertNotIn("error", str(output))
 
-    def test_create_reissue_burn_asset(self):
+    def test_create_reissue_burn_asset_sponsor(self):
         random_amount = random.randint(1, 10000000000000000)
         random_fee = random.randint(1, random_amount)
         with self.assertRaises(Exception):
