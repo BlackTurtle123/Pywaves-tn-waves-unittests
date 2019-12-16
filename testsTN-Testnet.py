@@ -131,7 +131,7 @@ class TNTest(unittest.TestCase):
         transfer_sponsor = address.sendAsset(address2, py.Asset(asset_id), 100, attachment='testing sponsorhsip',
                                              feeAsset=py.Asset(asset_id), txFee=random_fee, timestamp=0)
         self.assertNotIn("error", str(transfer_sponsor))
-        self.assertIn("error", "'fee': " + str(random_fee))
+        self.assertIn("'fee': " + str(random_fee), str(transfer_sponsor))
 
     def test_create_reissue_burn_smart_asset(self):
         script = 'match tx { \n' + \
