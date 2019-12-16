@@ -102,11 +102,13 @@ class TNTest(unittest.TestCase):
         self.assertNotIn("error", str(output))
 
     def test_create_reissue_burn_asset(self):
+        random_amount = random.randint(1, 10000000000000000)
+        random_fee = random.randint(1, random_amount)
         with self.assertRaises(Exception):
-            asset_create = address.issueAsset(self.gen_random_str(16), self.gen_random_str(16), 10000000000, 8,
+            asset_create = address.issueAsset(self.gen_random_str(16), self.gen_random_str(16), random_amount, 8,
                                               reissuable=True)
 
-        asset_create = address.issueAsset(self.gen_random_str(16), self.gen_random_str(16), 10000000000, 8,
+        asset_create = address.issueAsset(self.gen_random_str(16), self.gen_random_str(16), random_amount, 8,
                                           reissuable=True,
                                           txFee=100000000000)
 
@@ -121,6 +123,15 @@ class TNTest(unittest.TestCase):
         self.assertIn("ERROR", str(asset_burn))
         asset_burn = address.burnAsset(py.Asset(asset_id), 10, txFee=2000000)
         self.assertNotIn("ERROR", str(asset_burn))
+        sponsor = address.sponsorAsset(asset_id, random_fee, 1000000000 - 1)
+        self.assertIn("error", str(sponsor))
+        sponsor = address.sponsorAsset(asset_id, random_fee, 1000000000)
+        self.assertNotIn("error", str(sponsor))
+        time.sleep(60)
+        transfer_sponsor = address.sendAsset(address2, py.Asset(asset_id), 100, attachment='testing sponsorhsip',
+                                             feeAsset=py.Asset(asset_id), txFee=random_fee, timestamp=0)
+        self.assertNotIn("error", str(transfer_sponsor))
+        self.assertIn("error", "'fee': " + str(random_fee))
 
     def test_create_reissue_burn_smart_asset(self):
         script = 'match tx { \n' + \
