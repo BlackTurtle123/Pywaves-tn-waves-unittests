@@ -64,8 +64,13 @@ class TNTest(unittest.TestCase):
     def test_tx_right(self):
         output = address.sendWaves(address, 1, txFee=2000000)
         self.assertNotIn("error", str(output))
+        
+    def test_tx_spam(self):
+        for i in range(1000):
+            output = address.sendWaves(address, 1, txFee=2000000)
+            self.assertNotIn("error", str(output))
 
-    def test_create_alias_error_not_enough_fee(self):
+    def test__dat_alias_error_not_enough_fee(self):
         output = address.createAlias("not_enough_fee" + self.gen_random_str(10))
         self.assertIn("does not exceed minimal value of ", str(output))
 
@@ -176,7 +181,7 @@ class TNTest(unittest.TestCase):
         data = [{
             'type': 'string',
             'key': 'test',
-            'value': 'testval'
+            'value': 'testval'+str(datetime.datetime.now())
         }]
         data_tx = address.dataTransaction(data, baseFee=2000000, minimalFee=2100000)
         self.assertNotIn("does not exceed minimal value of ", str(data_tx))
