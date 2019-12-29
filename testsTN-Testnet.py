@@ -8,15 +8,14 @@ import unittest
 
 py.setNode('https://apitnetworktest.blackturtle.eu', 'testnetTN', 'l')
 py.setMatcher('https://tntestnetmatcher.blackturtle.eu')
-
+py.DEFAULT_CURRENCY='TN'
 
 address = py.Address(seed='input a seed here')
 address2 = py.Address(
     seed="seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed seed")
 
 ASSET = "2GRJaVYhhQPKVoWQFyJfTfx3eB5DD7CPdG7ZYx3Cs6Mk"
-PAIR = py.AssetPair(py.Asset(ASSET), py.Asset(""))
-RESET_PAIR = py.AssetPair(py.Asset(ASSET), py.Asset("TN"))
+PAIR = py.AssetPair(py.Asset(ASSET), py.Asset("TN"))
 py.THROW_EXCEPTION_ON_ERROR = True
 
 
@@ -64,13 +63,13 @@ class TNTest(unittest.TestCase):
     def test_tx_right(self):
         output = address.sendWaves(address, 1, txFee=2000000)
         self.assertNotIn("error", str(output))
-        
+
     def test_tx_spam(self):
         for i in range(1000):
             output = address.sendWaves(address, 1, txFee=2000000)
             self.assertNotIn("error", str(output))
 
-    def test__dat_alias_error_not_enough_fee(self):
+    def test_create_alias_error_not_enough_fee(self):
         output = address.createAlias("not_enough_fee" + self.gen_random_str(10))
         self.assertIn("does not exceed minimal value of ", str(output))
 
@@ -85,12 +84,12 @@ class TNTest(unittest.TestCase):
     def test_create_order_not_enough_fee(self):
         with self.assertRaises(Exception):
             address.buy(PAIR, 100000, 1000000, matcherFee=3999999)
-        address.cancelOpenOrders(RESET_PAIR)
+        address.cancelOpenOrders(PAIR)
 
     def test_create_order_enough_fee(self):
-        address.cancelOpenOrders(RESET_PAIR)
+        address.cancelOpenOrders(PAIR)
         output = address.buy(PAIR, 100000, 1000000, matcherFee=4000000)
-        address.cancelOpenOrders(RESET_PAIR)
+        address.cancelOpenOrders(PAIR)
         self.assertNotIn("error", str(output))
 
     def test_lease_not_enough_fee(self):
@@ -106,7 +105,7 @@ class TNTest(unittest.TestCase):
         output = address.leaseCancel(str(lease_output['id']), txFee=20000000)
         self.assertNotIn("error", str(output))
 
-    def test_create_reissue_burn_asset_sponsor(self):
+    def test_create_reissue_burn_asset(self):
         random_amount = random.randint(1, 10000000000000000)
         random_fee = random.randint(1, random_amount)
         with self.assertRaises(Exception):
@@ -124,10 +123,12 @@ class TNTest(unittest.TestCase):
         self.assertIn("ERROR", str(asset_reissue))
         asset_reissue = address.reissueAsset(py.Asset(asset_id), 10000, reissuable=True, txFee=100000000000)
         self.assertNotIn("ERROR", str(asset_reissue))
+
         asset_burn = address.burnAsset(py.Asset(asset_id), 10, txFee=1999999)
         self.assertIn("ERROR", str(asset_burn))
         asset_burn = address.burnAsset(py.Asset(asset_id), 10, txFee=2000000)
         self.assertNotIn("ERROR", str(asset_burn))
+
         sponsor = address.sponsorAsset(asset_id, random_fee, 1000000000 - 1)
         self.assertIn("error", str(sponsor))
         sponsor = address.sponsorAsset(asset_id, random_fee, 1000000000)
@@ -159,10 +160,12 @@ class TNTest(unittest.TestCase):
         self.assertIn("ERROR", str(asset_reissue))
         asset_reissue = address.reissueAsset(py.Asset(asset_id), 10000, reissuable=True, txFee=100000000000 + 4000000)
         self.assertNotIn("ERROR", str(asset_reissue))
+
         asset_burn = address.burnAsset(py.Asset(asset_id), 10, txFee=1999999 + 4000000)
         self.assertIn("ERROR", str(asset_burn))
         asset_burn = address.burnAsset(py.Asset(asset_id), 10, txFee=2000000 + 4000000)
         self.assertNotIn("ERROR", str(asset_burn))
+
         set_script = address.setAssetScript(py.Asset(asset_id), script)
         self.assertIn("does not exceed minimal value of", str(set_script))
         set_script = address.setAssetScript(py.Asset(asset_id), script, txFee=104000000)
@@ -181,13 +184,16 @@ class TNTest(unittest.TestCase):
         data = [{
             'type': 'string',
             'key': 'test',
-            'value': 'testval'+str(datetime.datetime.now())
+            'value': 'testval' + str(datetime.datetime.now())
         }]
         data_tx = address.dataTransaction(data, baseFee=2000000, minimalFee=2100000)
         self.assertNotIn("does not exceed minimal value of ", str(data_tx))
 
     def test_create_mass_transfer_error(self):
         transfers = [
+            # {'recipient': '3JcB4Ux7akWqVHeSjvdqrB151LG812qk4qX', 'amount': 1},
+            # {'recipient': '3JcB4Ux7akWqVHeSjvdqrB151LG812qk4qX', 'amount': 2},
+            # {'recipient': '3JcB4Ux7akWqVHeSjvdqrB151LG812qk4qX', 'amount': 3}
             {'recipient': '3XcE4knb13yyXKpdNvWhwvjrYsgMXsoicQM', 'amount': 1},
             {'recipient': '3XcE4knb13yyXKpdNvWhwvjrYsgMXsoicQM', 'amount': 2},
             {'recipient': '3XcE4knb13yyXKpdNvWhwvjrYsgMXsoicQM', 'amount': 3}
@@ -198,6 +204,9 @@ class TNTest(unittest.TestCase):
 
     def test_create_mass_transfer(self):
         transfers = [
+            # {'recipient': '3JcB4Ux7akWqVHeSjvdqrB151LG812qk4qX', 'amount': 1},
+            # {'recipient': '3JcB4Ux7akWqVHeSjvdqrB151LG812qk4qX', 'amount': 2},
+            # {'recipient': '3JcB4Ux7akWqVHeSjvdqrB151LG812qk4qX', 'amount': 3}
             {'recipient': '3XcE4knb13yyXKpdNvWhwvjrYsgMXsoicQM', 'amount': 1},
             {'recipient': '3XcE4knb13yyXKpdNvWhwvjrYsgMXsoicQM', 'amount': 2},
             {'recipient': '3XcE4knb13yyXKpdNvWhwvjrYsgMXsoicQM', 'amount': 3}
@@ -207,6 +216,36 @@ class TNTest(unittest.TestCase):
         self.assertNotIn("error", str(mass_tx))
         self.assertIn("id", str(mass_tx))
 
+    def test_create_nft_buy_sell_and_burn(self):
+        with self.assertRaises(Exception):
+            nft_create = address.issueAsset("nft " + self.gen_random_str(12), "nft " + self.gen_random_str(12), 1, 0,
+                                            reissuable=False, txFee=9999999)
+
+        nft_create = address.issueAsset("nft " + self.gen_random_str(12), "nft " + self.gen_random_str(12), 1, 0,
+                                        reissuable=False, txFee=10000000)
+
+        self.assertNotIn("error", str(nft_create))
+
+        asset_id = nft_create.assetId
+        time.sleep(60)
+
+        PAIR = py.AssetPair(py.Asset(asset_id), py.Asset("TN"))
+        address.cancelOpenOrders(PAIR)
+
+        output = address.sell(PAIR, 1, 100,maxLifetime=60000, matcherFee=4000000)
+        address.cancelOpenOrders(PAIR)
+        self.assertNotIn("error", str(output))
+
+        output = address.buy(PAIR, 1, 100,maxLifetime=60000, matcherFee=4000000)
+        address.cancelOpenOrders(PAIR)
+        self.assertNotIn("error", str(output))
+
+        nft_burn = address.burnAsset(py.Asset(asset_id), 1, txFee=1999999)
+        self.assertIn("ERROR", str(nft_burn))
+
+        nft_burn = address.burnAsset(py.Asset(asset_id), 1, txFee=2000000)
+        self.assertNotIn("ERROR", str(nft_burn))
 
 if __name__ == '__main__':
     unittest.main()
+
